@@ -15,6 +15,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
+import styled from 'styled-components';
 
 import { useSelection } from '@/hooks/use-selection';
 
@@ -39,6 +40,47 @@ interface CustomersTableProps {
   rowsPerPage?: number;
 }
 
+const ChatButton = styled('div')({
+  position: 'fixed',
+  bottom: '20px',
+  right: '20px',
+  width: '60px',
+  height: '60px',
+  background: 'rgb(110, 72, 170)',
+  color: 'white',
+  borderRadius: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  cursor: 'pointer',
+  zIndex: 1000,
+});
+
+const ChatbotContainer = styled('div')({
+  position: 'fixed',
+  bottom: '300px',
+  right: '200px',
+  width: '60px',
+  height: '60px',
+  background: 'rgb(110, 72, 170)',
+  color: 'white',
+  borderRadius: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  cursor: 'pointer',
+  zIndex: 1000,
+});
+
+const CloseButton = styled.div`
+  position: absolute;
+  top: 10px; /* Adjust the position as needed */
+  right: 10px; /* Adjust the position as needed */
+  cursor: pointer;
+  color: white;
+  background-color: white;
+`;
+
 export function CustomersTable({
   count = 0,
   rows = [],
@@ -53,6 +95,44 @@ export function CustomersTable({
 
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
+  const [showChatbot, setShowChatbot] = React.useState(false);
+  const handleChatbotClose = () => {
+    setShowChatbot(false);
+  };
+  const getConfig = (onClick) => {
+    const config = {
+      botName: 'myBot',
+      // initialMessages: [
+      //   createChatBotMessage(`Hi I'm ${botName}`),
+      // ],
+      customComponents: {
+        // Replaces the default header
+        header: () => (
+          <div style={{ backgroundColor: 'red', padding: '5px', borderRadius: '3px' }}>
+            This is the header <button onClick={close}>Close</button>
+          </div>
+        ),
+      },
+    };
+  };
+
+  const chatbotContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      console.log('click outside');
+      if (chatbotContainerRef.current && !chatbotContainerRef.current.contains(event.target as Node)) {
+        setShowChatbot(false);
+      }
+      setShowChatbot(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <Card>
@@ -126,6 +206,28 @@ export function CustomersTable({
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
       />
+      {/* {showChatbot ? (
+        <ChatbotContainer>
+          <ChatBot
+            config={getConfig(handleChatbotClose)}
+            steps={[
+              {
+                id: 'hello-world',
+                message: 'Hi there! How can I help you today?',
+                end: true,
+              },
+            ]}
+          />
+        </ChatbotContainer>
+      ) : (
+        <ChatButton
+          onClick={() => {
+            setShowChatbot(true);
+          }}
+        >
+          <ChatBubbleIcon fontSize="large" />
+        </ChatButton>
+      )} */}
     </Card>
   );
 }

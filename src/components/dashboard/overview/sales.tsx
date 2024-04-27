@@ -1,17 +1,20 @@
 'use client';
 
 import * as React from 'react';
+import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Divider from '@mui/material/Divider';
-import { alpha, useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import { ArrowClockwise as ArrowClockwiseIcon } from '@phosphor-icons/react/dist/ssr/ArrowClockwise';
 import { ArrowRight as ArrowRightIcon } from '@phosphor-icons/react/dist/ssr/ArrowRight';
 import type { ApexOptions } from 'apexcharts';
+import ChatBot from 'react-simple-chatbot';
+import styled from 'styled-components';
 
 import { Chart } from '@/components/core/chart';
 
@@ -20,8 +23,70 @@ export interface SalesProps {
   sx?: SxProps;
 }
 
+const ChatButton = styled('div')({
+  position: 'fixed',
+  bottom: '20px',
+  right: '20px',
+  width: '60px',
+  height: '60px',
+  background: 'rgb(110, 72, 170)',
+  color: 'white',
+  borderRadius: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  cursor: 'pointer',
+  zIndex: 1000,
+});
+
+const ChatbotContainer = styled('div')({
+  position: 'fixed',
+  bottom: '300px',
+  right: '200px',
+  width: '60px',
+  height: '60px',
+  background: 'rgb(110, 72, 170)',
+  color: 'white',
+  borderRadius: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  cursor: 'pointer',
+  zIndex: 1000,
+});
+
+const CloseButton = styled.div`
+  position: absolute;
+  top: 10px; /* Adjust the position as needed */
+  right: 10px; /* Adjust the position as needed */
+  cursor: pointer;
+  color: white;
+  background-color: white;
+`;
+
 export function Sales({ chartSeries, sx }: SalesProps): React.JSX.Element {
   const chartOptions = useChartOptions();
+  const [showChatbot, setShowChatbot] = React.useState(false);
+  // const handleChatbotClose = () => {
+  //   setShowChatbot(false);
+  // };
+
+  const chatbotContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (chatbotContainerRef.current && !chatbotContainerRef.current.contains(event.target as Node)) {
+        setShowChatbot(false);
+      }
+      setShowChatbot(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    // return () => {
+    //   document.removeEventListener('mousedown', handleClickOutside);
+    // };
+  }, []);
 
   return (
     <Card sx={sx}>
@@ -42,6 +107,42 @@ export function Sales({ chartSeries, sx }: SalesProps): React.JSX.Element {
           Overview
         </Button>
       </CardActions>
+      {showChatbot ? (
+        <ChatbotContainer>
+          <ChatBot
+            steps={[
+              {
+                id: 'hello-world',
+                message: 'Hi there! How can I help you today?',
+                trigger: 'user-input',
+              },
+              {
+                id: 'user-input',
+                user: true,
+                trigger: 'response',
+              },
+              {
+                id: 'response',
+                message: 'Thank you for your message!',
+                trigger: 'another-step',
+              },
+              {
+                id: 'another-step',
+                message: 'I will get back to you soon.',
+                end: true,
+              },
+            ]}
+          />
+        </ChatbotContainer>
+      ) : (
+        <ChatButton
+          onClick={() => {
+            setShowChatbot(true);
+          }}
+        >
+          <ChatBubbleIcon fontSize="large" />
+        </ChatButton>
+      )}
     </Card>
   );
 }
